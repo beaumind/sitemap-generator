@@ -135,11 +135,26 @@ func (s *SitemapIndex) WriteTo(writer io.Writer) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+
+	sort.SliceStable(s.SitemapLocs, func(i, j int) bool {
+		locI := extractSortableKey(s.SitemapLocs[i].Loc)
+		locJ := extractSortableKey(s.SitemapLocs[j].Loc)
+		return locI < locJ
+	})
+
+	// Encode only the index
 	encoder := xml.NewEncoder(writer)
 	if s.prettyPrint {
 		encoder.Indent("", "  ")
 	}
-	err = encoder.Encode(s)
+	err = encoder.Encode(struct {
+		XMLName xml.Name           `xml:"sitemapindex"`
+		Xmlns   string             `xml:"xmlns,attr"`
+		Sitemap []*SitemapIndexLoc `xml:"sitemap"`
+	}{
+		Xmlns:   s.Xmlns,
+		Sitemap: s.SitemapLocs,
+	})
 	if err != nil {
 		return 0, err
 	}
