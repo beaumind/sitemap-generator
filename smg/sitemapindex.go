@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"sort"
 	"sync"
 	"time"
 )
@@ -162,6 +163,10 @@ func (s *SitemapIndex) Save() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
+	sort.SliceStable(s.SitemapLocs, func(i, j int) bool {
+		return s.SitemapLocs[i].Loc < s.SitemapLocs[j].Loc
+	})
 
 	var filename string
 	if s.Compress {
