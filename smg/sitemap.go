@@ -112,7 +112,6 @@ func (s *Sitemap) realAdd(u *SitemapLoc, locN int, locBytes []byte) error {
 			return err
 		}
 
-		// Only prepend hostname if u.Loc is relative
 		if !loc.IsAbs() {
 			base, err := url.Parse(s.Hostname)
 			if err != nil {

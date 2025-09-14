@@ -189,33 +189,25 @@ func (s *SitemapIndex) Save() (string, error) {
 }
 
 func (s *SitemapIndex) saveSitemaps() error {
-	for _, sitemap := range s.Sitemaps {
-		s.wg.Add(1)
-		go func(sm *Sitemap) {
-			defer s.wg.Done()
-
-			smFilenames, err := sm.Save()
+	for _, sm := range s.Sitemaps {
+		smFilenames, err := sm.Save()
+		if err != nil {
+			log.Println("Error while saving this sitemap:", sm.Name, err)
+			return err
+		}
+		for _, smFilename := range smFilenames {
+			output, err := url.Parse(s.Hostname)
 			if err != nil {
 				log.Println("Error while saving this sitemap:", sm.Name, err)
-				return
+				return err
 			}
-			for _, smFilename := range smFilenames {
-				// sm.SitemapIndexLoc.Loc = filepath.Join(s.Hostname, s.ServerURI, smFilename)
-
-				output, err := url.Parse(s.Hostname)
-				if err != nil {
-					log.Println("Error while saving this sitemap:", sm.Name, err)
-					return
-				}
-				output.Path = path.Join(output.Path, s.ServerURI, smFilename)
-				smIndexLoc := &SitemapIndexLoc{
-					Loc: output.String(),
-				}
-				s.Add(smIndexLoc)
+			output.Path = path.Join(output.Path, s.ServerURI, smFilename)
+			smIndexLoc := &SitemapIndexLoc{
+				Loc: output.String(),
 			}
-		}(sitemap)
+			s.Add(smIndexLoc)
+		}
 	}
-	s.wg.Wait()
 	return nil
 }
 
@@ -232,7 +224,7 @@ func (s *SitemapIndex) PingSearchEngines(pingURLs ...string) error {
 		wg.Add(1)
 		go func(urlFormat string) {
 			defer wg.Done()
-			
+
 			urlStr := fmt.Sprintf(urlFormat, s.finalURL)
 			log.Println("Pinging", urlStr)
 
