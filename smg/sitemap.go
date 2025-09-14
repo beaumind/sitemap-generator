@@ -107,15 +107,20 @@ func (s *Sitemap) realAdd(u *SitemapLoc, locN int, locBytes []byte) error {
 	}
 
 	if locBytes == nil {
-		output, err := url.Parse(s.Hostname)
-		if err != nil {
-			return err
-		}
 		loc, err := url.Parse(u.Loc)
 		if err != nil {
 			return err
 		}
-		u.Loc = output.ResolveReference(loc).String()
+
+		// Only prepend hostname if u.Loc is relative
+		if !loc.IsAbs() {
+			base, err := url.Parse(s.Hostname)
+			if err != nil {
+				return err
+			}
+			u.Loc = base.ResolveReference(loc).String()
+		}
+
 		locN, locBytes, err = s.encodeToXML(u)
 		if err != nil {
 			return err
