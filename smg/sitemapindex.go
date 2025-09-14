@@ -165,7 +165,9 @@ func (s *SitemapIndex) Save() (string, error) {
 	}
 
 	sort.SliceStable(s.SitemapLocs, func(i, j int) bool {
-		return s.SitemapLocs[i].Loc < s.SitemapLocs[j].Loc
+		locI := extractSortableKey(s.SitemapLocs[i].Loc)
+		locJ := extractSortableKey(s.SitemapLocs[j].Loc)
+		return locI < locJ
 	})
 
 	var filename string
