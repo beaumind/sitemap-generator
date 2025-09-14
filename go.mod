@@ -1,5 +1,5 @@
-module github.com/sabloger/sitemap-generator
+module github.com/beaumind/sitemap-generator
 
-go 1.16
+go 1.23.1
 
 require github.com/stretchr/testify v1.7.1
